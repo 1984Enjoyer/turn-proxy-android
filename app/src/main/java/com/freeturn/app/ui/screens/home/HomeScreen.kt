@@ -58,6 +58,8 @@ fun HomeScreen(
 ) {
     val context = LocalContext.current
     val status by proxyViewModel.status.collectAsStateWithLifecycle()
+    val traffic by proxyViewModel.traffic.collectAsStateWithLifecycle()
+    val ping by proxyViewModel.ping.collectAsStateWithLifecycle()
     val uptimeText = rememberProxyUptime(status.connectedSince)
     val clientConfig by serverConfigViewModel.clientConfig.collectAsStateWithLifecycle()
     val updateState by settingsViewModel.updateState.collectAsStateWithLifecycle()
@@ -187,6 +189,16 @@ fun HomeScreen(
                             .padding(bottom = Spacing.md)
                     )
                 }
+                ConnectionStatsCard(
+                    status = status,
+                    traffic = traffic,
+                    ping = ping,
+                    onPingClick = proxyViewModel::refreshPing,
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .widthIn(max = SettingsContentMaxWidth)
+                        .padding(bottom = StatsCardBottomPadding)
+                )
             }
         }
     }

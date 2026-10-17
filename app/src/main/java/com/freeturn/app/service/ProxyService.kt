@@ -1,5 +1,8 @@
 package com.freeturn.app.service
 
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import com.freeturn.app.data.config.Socks5Config
 
 import android.content.BroadcastReceiver
@@ -120,6 +123,7 @@ class ProxyService : VpnService() {
             ContextCompat.RECEIVER_NOT_EXPORTED
         )
         scope.launch { observeStatus() }
+        scope.launch { observeTraffic() }
         scope.launch { observeCoreErrors() }
     }
 
@@ -341,6 +345,16 @@ class ProxyService : VpnService() {
         if (stopping.get() || !engine.isRunning) return
         log.add("Сеть: сменились DNS - обновляем резолверы ядра")
         withCoreDns { session, dns -> engine.setDnsServers(session, dns) }
+    }
+
+    // No polling while the screen is off.
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private suspend fun observeTraffic() {
+        applicationContext.screenOnFlow()
+            .flatMapLatest { on ->
+                if (on) engine.traffic.stats(store.status) else emptyFlow()
+            }
+            .collect { notifier.updateTraffic(it) }
     }
 
     private fun withCoreDns(apply: (session: Long, dns: String) -> Unit) {
