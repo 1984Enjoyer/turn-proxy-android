@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.2.0](https://github.com/hackdiaz-dev/turn-proxy-android/compare/v5.1.1...v5.2.0) (2026-10-17)
+
+
+### Features
+
+* connection stats card, ping, theme mode and AMOLED, shared split tunnel sheet fix ([59c3aed](https://github.com/hackdiaz-dev/turn-proxy-android/commit/59c3aed0766d37723ff6e95fb048819258fa089c))
+
 ## [5.1.1](https://github.com/hackdiaz-dev/turn-proxy-android/compare/v5.1.0...v5.1.1) (2026-10-10)
 
 
