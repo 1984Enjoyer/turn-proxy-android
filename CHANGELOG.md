@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.2.1](https://github.com/hackdiaz-dev/turn-proxy-android/compare/v5.2.0...v5.2.1) (2026-10-17)
+
+
+### Fixes
+
+* stats card no longer overlaps the hero on small screens ([1f3f99d](https://github.com/hackdiaz-dev/turn-proxy-android/commit/1f3f99d4bf6a18161ada0bf150b7047af9e992a3))
+
 ## [5.2.0](https://github.com/hackdiaz-dev/turn-proxy-android/compare/v5.1.1...v5.2.0) (2026-10-17)
 
 
