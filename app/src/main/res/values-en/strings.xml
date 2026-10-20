@@ -166,7 +166,7 @@
     <string name="setup_task_state_active">In progress</string>
     <string name="setup_task_state_failed">Failed</string>
     <string name="setup_task_state_pending">Pending</string>
-    <string name="proxy_captcha_required">Captcha required</string>
+    <string name="proxy_captcha_required">Captcha check</string>
     <string name="ssh_connecting">SSH: pairing…</string>
     <string name="reconnect">Pair again</string>
     <string name="server_connection_lost_title">No connection to the server</string>
@@ -310,8 +310,11 @@
     <string name="notif_proxy_connecting">Connecting…</string>
     <string name="notif_channel_proxy">Proxy</string>
     <string name="notif_channel_captcha">Captcha</string>
-    <string name="notif_captcha_title">Captcha required</string>
-    <string name="notif_captcha_text">Open the app to complete the check</string>
+    <string name="notif_captcha_title">Captcha check</string>
+    <string name="notif_captcha_auto">Captcha is being solved</string>
+    <string name="notif_captcha_manual">Manual CAPTCHA solving required</string>
+    <string name="advanced_captcha">Advanced CAPTCHA solving</string>
+    <string name="advanced_captcha_desc">Use the new automatic method. When off, use the previous automatic solver without a browser.</string>
     <string name="notif_proxy_connect_error">Connection error</string>
     <string name="notif_proxy_vpn_permission">VPN permission required - open the app</string>
     <string name="notif_proxy_vpn_denied">VPN permission not granted - proxy not started</string>

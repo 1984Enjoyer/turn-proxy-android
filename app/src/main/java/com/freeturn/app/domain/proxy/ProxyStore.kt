@@ -91,11 +91,11 @@ class ProxyStore {
         _status.update { it.copy(tunnelUp = up) }
     }
 
-    /** Пустой [url] - капча снята. Фазу ведёт ядро, здесь только адрес окна. */
-    fun setCaptcha(url: String) {
+    /** Пустой [url] - проверка завершена; manual указывает, нужен ли диалог. */
+    fun setCaptcha(url: String, manual: Boolean) {
         _status.update {
-            if (url.isBlank()) it.copy(captchaUrl = "")
-            else it.copy(captchaUrl = url, captchaId = captchaSeq.incrementAndGet())
+            if (url.isBlank()) it.copy(captchaUrl = "", captchaManual = false)
+            else it.copy(captchaUrl = url, captchaManual = manual, captchaId = captchaSeq.incrementAndGet())
         }
     }
 

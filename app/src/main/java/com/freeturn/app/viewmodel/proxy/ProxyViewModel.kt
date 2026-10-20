@@ -153,7 +153,7 @@ class ProxyViewModel(
     }
 
     /** Окно закрыл пользователь; ядро ждёт решения дальше и выдаст новую капчу. */
-    fun dismissCaptcha() = store.setCaptcha("")
+    fun dismissCaptcha() = store.setCaptcha("", manual = false)
 
     /** С экрана чистим и файл: сохранять историю против воли пользователя незачем. */
     fun clearLogs() = log.clearAll()

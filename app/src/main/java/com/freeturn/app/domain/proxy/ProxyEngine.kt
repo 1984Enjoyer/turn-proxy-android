@@ -240,9 +240,9 @@ class ProxyEngine(
             log.add(msg, level.toLogLevel())
         }
 
-        override fun onCaptcha(url: String) {
+        override fun onCaptcha(url: String, manual: Boolean) {
             if (running == 0L) return
-            store.setCaptcha(url)
+            store.setCaptcha(url, manual)
         }
     }
 }

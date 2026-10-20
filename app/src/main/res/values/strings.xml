@@ -174,7 +174,7 @@
     <string name="setup_task_state_active">Выполняется</string>
     <string name="setup_task_state_failed">Ошибка</string>
     <string name="setup_task_state_pending">В ожидании</string>
-    <string name="proxy_captcha_required">Требуется прохождение капчи</string>
+    <string name="proxy_captcha_required">Проверка CAPTCHA</string>
     <string name="tcp" translatable="false">TCP</string>
     <string name="udp" translatable="false">UDP</string>
     <string name="ssh_connecting">SSH: сопряжение…</string>
@@ -338,8 +338,11 @@
     <string name="notif_proxy_connecting">Подключение…</string>
     <string name="notif_channel_proxy">Прокси</string>
     <string name="notif_channel_captcha">Капча</string>
-    <string name="notif_captcha_title">Требуется прохождение капчи</string>
-    <string name="notif_captcha_text">Откройте приложение для проверки</string>
+    <string name="notif_captcha_title">Проверка CAPTCHA</string>
+    <string name="notif_captcha_auto">CAPTCHA решается</string>
+    <string name="notif_captcha_manual">Требуется ручное решение CAPTCHA</string>
+    <string name="advanced_captcha">Продвинутое решение CAPTCHA</string>
+    <string name="advanced_captcha_desc">Использовать новый автоматический способ. При выключении останется прежнее авто решение без браузера.</string>
     <string name="notif_proxy_connect_error">Ошибка подключения</string>
     <string name="notif_proxy_vpn_permission">Нужно разрешение VPN - откройте приложение</string>
     <string name="notif_proxy_vpn_denied">Разрешение VPN не выдано - прокси не запущен</string>

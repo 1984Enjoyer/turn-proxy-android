@@ -6,9 +6,13 @@
 package com.freeturn.app.ui.screens.captcha
 
 import android.annotation.SuppressLint
+import android.os.Build
+import android.os.Handler
+import android.os.Looper
 import android.webkit.WebChromeClient
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import java.lang.ref.WeakReference
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -26,10 +30,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.compose.ui.zIndex
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.core.net.toUri
@@ -108,6 +114,81 @@ fun CaptchaWebViewDialog(
     }
 }
 
+/**
+ * Host for the automatic captcha page. It is mounted for the entire VPN session, so
+ * the service can load a challenge even after the Activity enters the background.
+ */
+@Composable
+fun AutomaticCaptchaWebViewHost() {
+    val context = LocalContext.current
+    AndroidView(
+        modifier = Modifier.fillMaxSize().alpha(0f).zIndex(-1f),
+        factory = { createCaptchaWebView(context).also(AutomaticCaptchaWebViewHostController::attach) },
+        onRelease = {
+            AutomaticCaptchaWebViewHostController.detach(it)
+            it.stopLoading()
+            it.destroy()
+        }
+    )
+}
+
+/** Main-thread bridge from the long-lived VPN service to the Activity-owned WebView. */
+object AutomaticCaptchaWebViewHostController {
+    private val main = Handler(Looper.getMainLooper())
+    private var webView = WeakReference<WebView>(null)
+    private var pendingUrl = ""
+    private var pendingChallengeId = Long.MIN_VALUE
+    private var loadedChallengeId = Long.MIN_VALUE
+
+    fun attach(view: WebView) {
+        main.post {
+            webView = WeakReference(view)
+            loadedChallengeId = Long.MIN_VALUE
+            loadPending(view)
+        }
+    }
+
+    fun detach(view: WebView) {
+        main.post {
+            if (webView.get() === view) {
+                webView.clear()
+                loadedChallengeId = Long.MIN_VALUE
+            }
+        }
+    }
+
+    fun show(url: String, challengeId: Long) {
+        val safeUrl = url.takeIf(::isLocalCaptchaUrl).orEmpty()
+        main.post {
+            pendingUrl = safeUrl
+            pendingChallengeId = challengeId
+            webView.get()?.let(::loadPending)
+        }
+    }
+
+    fun clear() {
+        main.post {
+            pendingUrl = ""
+            pendingChallengeId = Long.MIN_VALUE
+            loadedChallengeId = Long.MIN_VALUE
+            webView.get()?.apply {
+                stopLoading()
+                if (url != "about:blank") loadUrl("about:blank")
+            }
+        }
+    }
+
+    private fun loadPending(view: WebView) {
+        if (pendingUrl.isBlank() || loadedChallengeId == pendingChallengeId) return
+        loadedChallengeId = pendingChallengeId
+        // The VPN service can deliver a challenge while the Activity is stopped.
+        // Resume WebView timers before loading so the page's PoW work is not left
+        // paused with the UI lifecycle.
+        view.onResume()
+        view.loadUrl(pendingUrl)
+    }
+}
+
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
 private fun CaptchaWebView(url: String) {
@@ -118,16 +199,7 @@ private fun CaptchaWebView(url: String) {
         AndroidView(
             modifier = Modifier.fillMaxSize(),
             factory = {
-                WebView(context).apply {
-                    settings.javaScriptEnabled = true
-                    settings.domStorageEnabled = true
-                    settings.userAgentString = settings.userAgentString.replace("; wv)", ")")
-                    webViewClient = object : WebViewClient() {
-                        override fun shouldOverrideUrlLoading(
-                            view: WebView,
-                            request: android.webkit.WebResourceRequest
-                        ): Boolean = !isLocalCaptchaUrl(request.url.toString())
-                    }
+                createCaptchaWebView(context).apply {
                     webChromeClient = object : WebChromeClient() {
                         override fun onProgressChanged(view: WebView, newProgress: Int) {
                             progress = newProgress / 100f
@@ -144,5 +216,23 @@ private fun CaptchaWebView(url: String) {
                 modifier = Modifier.align(Alignment.TopCenter)
             )
         }
+    }
+}
+
+@SuppressLint("SetJavaScriptEnabled")
+private fun createCaptchaWebView(context: android.content.Context) = WebView(context).apply {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        // Keep the renderer bound to this app while the VPN foreground service is active,
+        // even though the hidden CAPTCHA view is not on screen.
+        setRendererPriorityPolicy(WebView.RENDERER_PRIORITY_BOUND, false)
+    }
+    settings.javaScriptEnabled = true
+    settings.domStorageEnabled = true
+    settings.userAgentString = settings.userAgentString.replace("; wv)", ")")
+    webViewClient = object : WebViewClient() {
+        override fun shouldOverrideUrlLoading(
+            view: WebView,
+            request: android.webkit.WebResourceRequest
+        ): Boolean = !isLocalCaptchaUrl(request.url.toString())
     }
 }

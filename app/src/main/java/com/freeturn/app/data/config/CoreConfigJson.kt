@@ -51,6 +51,8 @@ data class CoreConfigJson(
         val links: List<String>,
         val streamsPerCred: Int,
         val manualCaptcha: Boolean,
+        val autoCaptcha: Boolean = true,
+        val advancedCaptcha: Boolean = true,
         val platform: String,
     )
 
@@ -110,6 +112,7 @@ fun ClientConfig.toCoreJson(
     srv: ServerOpts,
     carrierDns: String? = null,
     ownClientId: String = "",
+    advancedCaptchaEnabled: Boolean = true,
 ): String {
     val dnsServers = coreDnsServers { carrierDns }
 
@@ -147,6 +150,8 @@ fun ClientConfig.toCoreJson(
                 streamsPerCred = streamsPerCred.takeIf { it > 0 }
                     ?: ClientConfig.DEFAULT_STREAMS_PER_CRED,
                 manualCaptcha = manualCaptcha,
+                autoCaptcha = true,
+                advancedCaptcha = advancedCaptchaEnabled,
                 platform = CoreConfigJson.PLATFORM_MOBILE,
             ),
             obf = CoreConfigJson.Obf(

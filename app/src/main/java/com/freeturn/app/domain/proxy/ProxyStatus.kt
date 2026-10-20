@@ -17,6 +17,7 @@ data class ProxyStatus(
     val connectedSince: Long? = null,
     val error: String = "",
     val captchaUrl: String = "",
+    val captchaManual: Boolean = false,
     val captchaId: Long = 0,
 ) {
     /** Прокси запущен или запускается - настройки подключения трогать нельзя. */

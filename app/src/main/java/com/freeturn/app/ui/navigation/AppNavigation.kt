@@ -11,6 +11,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
@@ -151,13 +152,15 @@ fun AppNavigation(
             }
         }
     ) {
-        AppNavHost(
-            navController = navController,
-            settingsViewModel = settingsViewModel,
-            proxyViewModel = proxyViewModel,
-            serverViewModel = serverViewModel,
-            serverConfigViewModel = serverConfigViewModel
-        )
+        Box(modifier = Modifier.fillMaxSize()) {
+            AppNavHost(
+                navController = navController,
+                settingsViewModel = settingsViewModel,
+                proxyViewModel = proxyViewModel,
+                serverViewModel = serverViewModel,
+                serverConfigViewModel = serverConfigViewModel
+            )
+        }
     }
 
     ImportSheet(
@@ -167,7 +170,7 @@ fun AppNavigation(
     // Диалог капчи поверх любого экрана. key(captchaId) - чтобы Compose пересоздавал
     // WebView на каждую новую капчу: ядро цикличит креды и выдаёт для них тот же
     // localhost-URL, иначе страница не перезагрузится.
-    if (status.busy && status.captchaUrl.isNotEmpty()) {
+    if (status.busy && status.captchaUrl.isNotEmpty() && status.captchaManual) {
         androidx.compose.runtime.key(status.captchaId) {
             CaptchaWebViewDialog(
                 captchaUrl = status.captchaUrl,

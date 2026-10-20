@@ -33,6 +33,7 @@ import com.freeturn.app.domain.proxy.ProxyStore
 import com.freeturn.app.domain.proxy.SocketProtector
 import com.freeturn.app.domain.proxy.Socks5Server
 import com.freeturn.app.domain.proxy.TunHandle
+import com.freeturn.app.ui.screens.captcha.AutomaticCaptchaWebViewHostController
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -330,6 +331,7 @@ class ProxyService : VpnService() {
         srv = opts,
         carrierDns = if (cfg.useCarrierDns) network.physicalDnsServers() else null,
         ownClientId = prefs.ownClientId(),
+        advancedCaptchaEnabled = prefs.advancedCaptchaFlow.first(),
     )
 
     private fun onNetworkHandover() {
@@ -369,6 +371,11 @@ class ProxyService : VpnService() {
     /** Нотификация ведётся тем же состоянием, что видит UI. */
     private suspend fun observeStatus() {
         store.status.collect { status ->
+            if (status.captchaUrl.isNotBlank() && !status.captchaManual) {
+                AutomaticCaptchaWebViewHostController.show(status.captchaUrl, status.captchaId)
+            } else {
+                AutomaticCaptchaWebViewHostController.clear()
+            }
             // После решения об остановке молчим: нотификация уже снята.
             if (stopping.get()) return@collect
             notifier.update(status, tunnelMode, provider)

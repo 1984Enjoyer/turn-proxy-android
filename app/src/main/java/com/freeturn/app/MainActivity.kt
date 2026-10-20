@@ -12,6 +12,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.Box
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
@@ -19,6 +20,7 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.freeturn.app.domain.share.LinkImportBus
 import com.freeturn.app.ui.util.HapticUtil
 import com.freeturn.app.ui.navigation.AppNavigation
+import com.freeturn.app.ui.screens.captcha.AutomaticCaptchaWebViewHost
 import com.freeturn.app.ui.theme.FreeTurnTheme
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -52,6 +54,7 @@ class MainActivity : ComponentActivity() {
         HapticUtil.perform(this, HapticUtil.Pattern.LAUNCH)
         enableEdgeToEdge()
         setContent {
+            val proxyStatus by proxyViewModel.status.collectAsStateWithLifecycle()
             val dynamicTheme by settingsViewModel.dynamicTheme
                 .collectAsStateWithLifecycle()
             val themeMode by settingsViewModel.themeMode
@@ -86,7 +89,10 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.surface
                 ) {
-                    AppNavigation()
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        if (proxyStatus.busy) AutomaticCaptchaWebViewHost()
+                        AppNavigation()
+                    }
                 }
             }
         }

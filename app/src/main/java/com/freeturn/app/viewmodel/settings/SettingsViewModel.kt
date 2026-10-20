@@ -36,6 +36,7 @@ class SettingsViewModel(
         prefs.themeModeFlow.state(ThemeMode.SYSTEM)
     val amoled: StateFlow<Boolean> = prefs.amoledFlow.state(false)
     val nerdMode: StateFlow<Boolean> = prefs.nerdModeFlow.state(true)
+    val advancedCaptcha: StateFlow<Boolean> = prefs.advancedCaptchaFlow.state(true)
     val privacyMode: StateFlow<Boolean> = prefs.privacyModeFlow.state(false)
     val seasonalDecor: StateFlow<Boolean> = prefs.seasonalDecorFlow.state(true)
     val autoConnect: StateFlow<Boolean> = prefs.autoConnectFlow.state(false)
@@ -126,6 +127,10 @@ class SettingsViewModel(
 
     fun setNerdMode(enabled: Boolean) {
         viewModelScope.launch { prefs.setNerdMode(enabled) }
+    }
+
+    fun setAdvancedCaptcha(enabled: Boolean) {
+        viewModelScope.launch { prefs.setAdvancedCaptcha(enabled) }
     }
 
     fun setTgSubscribeShown() {

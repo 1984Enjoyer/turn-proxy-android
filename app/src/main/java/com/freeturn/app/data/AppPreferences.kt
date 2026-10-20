@@ -49,6 +49,7 @@ class AppPreferences(context: Context) {
         private val V5_SETUP_NOTICE_PENDING = booleanPreferencesKey("v5_setup_notice_pending")
         val DYNAMIC_THEME = booleanPreferencesKey("dynamic_theme")
         val NERD_MODE = booleanPreferencesKey("nerd_mode")
+        val ADVANCED_CAPTCHA = booleanPreferencesKey("advanced_captcha")
         val PRIVACY_MODE = booleanPreferencesKey("privacy_mode")
         val SEASONAL_DECOR = booleanPreferencesKey("seasonal_decor")
         val TG_SUBSCRIBE_SHOWN = booleanPreferencesKey("tg_subscribe_shown")
@@ -193,6 +194,8 @@ class AppPreferences(context: Context) {
         prefFlow { p -> p[AMOLED] ?: false }
 
     val nerdModeFlow: Flow<Boolean> = prefFlow { prefs -> prefs[NERD_MODE] ?: true }
+
+    val advancedCaptchaFlow: Flow<Boolean> = prefFlow { prefs -> prefs[ADVANCED_CAPTCHA] ?: true }
 
     val privacyModeFlow: Flow<Boolean> = prefFlow { prefs -> prefs[PRIVACY_MODE] ?: false }
 
@@ -383,6 +386,10 @@ class AppPreferences(context: Context) {
 
     suspend fun setNerdMode(enabled: Boolean) {
         context.dataStore.edit { prefs -> prefs[NERD_MODE] = enabled }
+    }
+
+    suspend fun setAdvancedCaptcha(enabled: Boolean) {
+        context.dataStore.edit { prefs -> prefs[ADVANCED_CAPTCHA] = enabled }
     }
 
     suspend fun setPrivacyMode(enabled: Boolean) {
