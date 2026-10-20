@@ -36,7 +36,7 @@ class SettingsViewModel(
         prefs.themeModeFlow.state(ThemeMode.SYSTEM)
     val amoled: StateFlow<Boolean> = prefs.amoledFlow.state(false)
     val nerdMode: StateFlow<Boolean> = prefs.nerdModeFlow.state(true)
-    val advancedCaptcha: StateFlow<Boolean> = prefs.advancedCaptchaFlow.state(true)
+    val advancedCaptcha: StateFlow<Boolean> = prefs.advancedCaptchaFlow.state(false)
     val privacyMode: StateFlow<Boolean> = prefs.privacyModeFlow.state(false)
     val seasonalDecor: StateFlow<Boolean> = prefs.seasonalDecorFlow.state(true)
     val autoConnect: StateFlow<Boolean> = prefs.autoConnectFlow.state(false)

@@ -154,7 +154,7 @@ fun AdvancedScreen(
                     SettingsSwitchRow(
                         title = stringResource(R.string.advanced_captcha),
                         subtitle = stringResource(R.string.advanced_captcha_desc),
-                        iconRes = R.drawable.terminal_24px,
+                        iconRes = R.drawable.captcha_24px,
                         checked = advancedCaptcha,
                         onCheckedChange = settingsViewModel::setAdvancedCaptcha
                     )

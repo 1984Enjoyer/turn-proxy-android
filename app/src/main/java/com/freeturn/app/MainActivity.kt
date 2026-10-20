@@ -90,7 +90,11 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.surface
                 ) {
                     Box(modifier = Modifier.fillMaxSize()) {
-                        if (proxyStatus.busy) AutomaticCaptchaWebViewHost()
+                        if (proxyStatus.busy && proxyStatus.captchaUrl.isNotBlank() && !proxyStatus.captchaManual) {
+                            androidx.compose.runtime.key(proxyStatus.captchaId) {
+                                AutomaticCaptchaWebViewHost()
+                            }
+                        }
                         AppNavigation()
                     }
                 }

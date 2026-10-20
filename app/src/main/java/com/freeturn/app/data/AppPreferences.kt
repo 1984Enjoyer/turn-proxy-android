@@ -195,7 +195,7 @@ class AppPreferences(context: Context) {
 
     val nerdModeFlow: Flow<Boolean> = prefFlow { prefs -> prefs[NERD_MODE] ?: true }
 
-    val advancedCaptchaFlow: Flow<Boolean> = prefFlow { prefs -> prefs[ADVANCED_CAPTCHA] ?: true }
+    val advancedCaptchaFlow: Flow<Boolean> = prefFlow { prefs -> prefs[ADVANCED_CAPTCHA] ?: false }
 
     val privacyModeFlow: Flow<Boolean> = prefFlow { prefs -> prefs[PRIVACY_MODE] ?: false }
 
