@@ -76,11 +76,6 @@ class SettingsViewModel(
 
     init {
         viewModelScope.launch {
-            prefs.clientConfigFlow.collect { config ->
-                if (config.manualCaptcha) prefs.setAdvancedCaptcha(false)
-            }
-        }
-        viewModelScope.launch {
             _initialTgSubscribeShown.value = prefs.tgSubscribeShownFlow.first()
             _initialSuppressTgPrompt.value = prefs.suppressTgPromptFlow.first()
             _showV5SetupNotice.value = prefs.v5SetupNoticePending()

@@ -372,7 +372,7 @@ class ProxyService : VpnService() {
     private suspend fun observeStatus() {
         store.status.collect { status ->
             if (status.captchaUrl.isNotBlank() && !status.captchaManual) {
-                AutomaticCaptchaWebViewHostController.show(status.captchaUrl, status.captchaId)
+                AutomaticCaptchaWebViewHostController.show(this@ProxyService, status.captchaUrl, status.captchaId)
             } else {
                 AutomaticCaptchaWebViewHostController.clear()
             }

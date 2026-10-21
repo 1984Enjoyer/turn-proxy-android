@@ -12,7 +12,6 @@ import android.os.Looper
 import android.webkit.WebChromeClient
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import java.lang.ref.WeakReference
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -30,12 +29,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.compose.ui.zIndex
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.freeturn.app.R
@@ -118,79 +115,41 @@ fun CaptchaWebViewDialog(
     }
 }
 
-/**
- * Host for the automatic captcha page. It is mounted while an automatic challenge is active.
- * The Activity owns the WebView; the service only queues URLs through the controller, so
- * no Activity is launched when the app is backgrounded.
- */
-@Composable
-fun AutomaticCaptchaWebViewHost() {
-    val context = LocalContext.current
-    AndroidView(
-        modifier = Modifier.fillMaxSize().alpha(0f).zIndex(-1f),
-        factory = { createCaptchaWebView(context).also(AutomaticCaptchaWebViewHostController::attach) },
-        onRelease = {
-            AutomaticCaptchaWebViewHostController.detach(it)
-            it.stopLoading()
-            it.destroy()
-        }
-    )
-}
-
-/** Main-thread bridge from the long-lived VPN service to the Activity-owned WebView. */
+/** Service-owned WebView, created only for an automatic challenge and destroyed afterwards. */
 object AutomaticCaptchaWebViewHostController {
     private val main = Handler(Looper.getMainLooper())
-    private var webView = WeakReference<WebView>(null)
-    private var pendingUrl = ""
-    private var pendingChallengeId = Long.MIN_VALUE
+    private var webView: WebView? = null
     private var loadedChallengeId = Long.MIN_VALUE
 
-    fun attach(view: WebView) {
-        main.post {
-            webView = WeakReference(view)
-            loadedChallengeId = Long.MIN_VALUE
-            loadPending(view)
-        }
-    }
-
-    fun detach(view: WebView) {
-        main.post {
-            if (webView.get() === view) {
-                webView.clear()
-                loadedChallengeId = Long.MIN_VALUE
-            }
-        }
-    }
-
-    fun show(url: String, challengeId: Long) {
+    fun show(context: android.content.Context, url: String, challengeId: Long) {
         val safeUrl = url.takeIf(::isLocalCaptchaUrl).orEmpty()
         main.post {
-            pendingUrl = safeUrl
-            pendingChallengeId = challengeId
-            webView.get()?.let(::loadPending)
+            if (safeUrl.isBlank()) return@post
+            if (loadedChallengeId == challengeId) return@post
+            destroyWebView()
+            loadedChallengeId = challengeId
+            webView = createCaptchaWebView(context.applicationContext).also { view ->
+                view.onResume()
+                view.loadUrl(safeUrl)
+            }
         }
     }
 
     fun clear() {
         main.post {
-            pendingUrl = ""
-            pendingChallengeId = Long.MIN_VALUE
             loadedChallengeId = Long.MIN_VALUE
-            webView.get()?.apply {
-                stopLoading()
-                if (url != "about:blank") loadUrl("about:blank")
-            }
+            destroyWebView()
         }
     }
 
-    private fun loadPending(view: WebView) {
-        if (pendingUrl.isBlank() || loadedChallengeId == pendingChallengeId) return
-        loadedChallengeId = pendingChallengeId
-        // The VPN service can deliver a challenge while the Activity is stopped.
-        // Resume WebView timers before loading so the page's PoW work is not left
-        // paused with the UI lifecycle.
-        view.onResume()
-        view.loadUrl(pendingUrl)
+    private fun destroyWebView() {
+        webView?.apply {
+            stopLoading()
+            loadUrl("about:blank")
+            onPause()
+            destroy()
+        }
+        webView = null
     }
 }
 
@@ -233,6 +192,7 @@ private fun createCaptchaWebView(context: android.content.Context) = WebView(con
     }
     settings.javaScriptEnabled = true
     settings.domStorageEnabled = true
+    settings.allowContentAccess = false
     settings.userAgentString = settings.userAgentString.replace("; wv)", ")")
     webViewClient = object : WebViewClient() {
         override fun shouldOverrideUrlLoading(
