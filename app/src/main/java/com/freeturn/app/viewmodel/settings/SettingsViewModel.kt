@@ -13,7 +13,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -37,6 +39,8 @@ class SettingsViewModel(
     val amoled: StateFlow<Boolean> = prefs.amoledFlow.state(false)
     val nerdMode: StateFlow<Boolean> = prefs.nerdModeFlow.state(true)
     val advancedCaptcha: StateFlow<Boolean> = prefs.advancedCaptchaFlow.state(false)
+    val manualCaptcha: StateFlow<Boolean> =
+        prefs.clientConfigFlow.map { it.manualCaptcha }.state(false)
     val privacyMode: StateFlow<Boolean> = prefs.privacyModeFlow.state(false)
     val seasonalDecor: StateFlow<Boolean> = prefs.seasonalDecorFlow.state(true)
     val autoConnect: StateFlow<Boolean> = prefs.autoConnectFlow.state(false)
@@ -71,6 +75,11 @@ class SettingsViewModel(
     suspend fun batteryPromptShownOnce(): Boolean = prefs.batteryPromptShownFlow.first()
 
     init {
+        viewModelScope.launch {
+            prefs.clientConfigFlow.collect { config ->
+                if (config.manualCaptcha) prefs.setAdvancedCaptcha(false)
+            }
+        }
         viewModelScope.launch {
             _initialTgSubscribeShown.value = prefs.tgSubscribeShownFlow.first()
             _initialSuppressTgPrompt.value = prefs.suppressTgPromptFlow.first()
@@ -130,7 +139,10 @@ class SettingsViewModel(
     }
 
     fun setAdvancedCaptcha(enabled: Boolean) {
-        viewModelScope.launch { prefs.setAdvancedCaptcha(enabled) }
+        viewModelScope.launch {
+            if (enabled && prefs.clientConfigFlow.first().manualCaptcha) return@launch
+            prefs.setAdvancedCaptcha(enabled)
+        }
     }
 
     fun setTgSubscribeShown() {

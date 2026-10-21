@@ -343,6 +343,7 @@
     <string name="notif_captcha_manual">Требуется ручное решение CAPTCHA</string>
     <string name="advanced_captcha">Продвинутое решение CAPTCHA</string>
     <string name="advanced_captcha_desc">Новый способ решения капчи. В будущем он может стать основным и эта настройка будет удалена.</string>
+    <string name="advanced_captcha_disabled_manual_desc">Недоступно, пока в настройках активного подключения включён ручной ввод капчи.</string>
     <string name="notif_proxy_connect_error">Ошибка подключения</string>
     <string name="notif_proxy_vpn_permission">Нужно разрешение VPN - откройте приложение</string>
     <string name="notif_proxy_vpn_denied">Разрешение VPN не выдано - прокси не запущен</string>

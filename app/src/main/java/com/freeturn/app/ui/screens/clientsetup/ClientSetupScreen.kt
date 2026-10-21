@@ -223,7 +223,10 @@ fun ClientSetupScreen(
                         useUdp = saved.useUdp,
                         onUseUdp = { v -> clientEdit { it.copy(useUdp = v) } },
                         manualCaptcha = saved.manualCaptcha,
-                        onManualCaptcha = { v -> clientEdit { it.copy(manualCaptcha = v) } },
+                        onManualCaptcha = { v ->
+                            clientEdit { it.copy(manualCaptcha = v) }
+                            if (v) settingsViewModel.setAdvancedCaptcha(false)
+                        },
                         magicSwitch = saved.magicSwitch,
                         onMagicSwitch = { v -> clientEdit { it.copy(magicSwitch = v) } },
                         magicTurn = magicTurn,

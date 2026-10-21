@@ -38,16 +38,20 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.zIndex
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import androidx.core.net.toUri
 import com.freeturn.app.R
 import com.freeturn.app.ui.components.BusyProgressIndicator
+import java.net.URI
+import java.util.Locale
 
 /** Только локальный captcha-прокси ядра допускается к загрузке в WebView. */
-private fun isLocalCaptchaUrl(url: String): Boolean {
-    val uri = url.toUri()
-    val host = uri.host ?: return false
-    return uri.scheme?.lowercase() == "http" && (host == "127.0.0.1" || host == "localhost")
-}
+internal fun isLocalCaptchaUrl(url: String): Boolean = runCatching {
+    val uri = URI(url)
+    val host = uri.host?.lowercase(Locale.ROOT)
+    uri.scheme?.lowercase(Locale.ROOT) == "http" &&
+        uri.rawUserInfo == null &&
+        uri.port == 8765 &&
+        (host == "127.0.0.1" || host == "localhost")
+}.getOrDefault(false)
 
 /**
  * Ручная капча провайдера во встроенном WebView. Грузит локальный прокси ядра
@@ -115,8 +119,9 @@ fun CaptchaWebViewDialog(
 }
 
 /**
- * Host for the automatic captcha page. It is mounted for the entire VPN session, so
- * the service can load a challenge even after the Activity enters the background.
+ * Host for the automatic captcha page. It is mounted while an automatic challenge is active.
+ * The Activity owns the WebView; the service only queues URLs through the controller, so
+ * no Activity is launched when the app is backgrounded.
  */
 @Composable
 fun AutomaticCaptchaWebViewHost() {

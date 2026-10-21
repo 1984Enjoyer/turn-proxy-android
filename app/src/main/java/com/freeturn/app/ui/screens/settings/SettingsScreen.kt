@@ -121,6 +121,7 @@ fun AdvancedScreen(
 ) {
     val nerdMode by settingsViewModel.nerdMode.collectAsStateWithLifecycle()
     val advancedCaptcha by settingsViewModel.advancedCaptcha.collectAsStateWithLifecycle()
+    val manualCaptcha by settingsViewModel.manualCaptcha.collectAsStateWithLifecycle()
     val restartServerOnSwitch by settingsViewModel.restartServerOnSwitch.collectAsStateWithLifecycle()
     val hotspotProxyEnabled by settingsViewModel.hotspotProxyEnabled.collectAsStateWithLifecycle()
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
@@ -153,9 +154,13 @@ fun AdvancedScreen(
                 SettingsCard {
                     SettingsSwitchRow(
                         title = stringResource(R.string.advanced_captcha),
-                        subtitle = stringResource(R.string.advanced_captcha_desc),
+                        subtitle = stringResource(
+                            if (manualCaptcha) R.string.advanced_captcha_disabled_manual_desc
+                            else R.string.advanced_captcha_desc
+                        ),
                         iconRes = R.drawable.captcha_24px,
-                        checked = advancedCaptcha,
+                        checked = advancedCaptcha && !manualCaptcha,
+                        enabled = !manualCaptcha,
                         onCheckedChange = settingsViewModel::setAdvancedCaptcha
                     )
                 }

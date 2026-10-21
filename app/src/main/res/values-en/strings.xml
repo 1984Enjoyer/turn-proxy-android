@@ -315,6 +315,7 @@
     <string name="notif_captcha_manual">Manual CAPTCHA solving required</string>
     <string name="advanced_captcha">Advanced CAPTCHA solving</string>
     <string name="advanced_captcha_desc">A new way to solve CAPTCHA. In the future, it may become the default and this setting may be removed.</string>
+    <string name="advanced_captcha_disabled_manual_desc">Unavailable while manual CAPTCHA solving is enabled for the active connection.</string>
     <string name="notif_proxy_connect_error">Connection error</string>
     <string name="notif_proxy_vpn_permission">VPN permission required - open the app</string>
     <string name="notif_proxy_vpn_denied">VPN permission not granted - proxy not started</string>

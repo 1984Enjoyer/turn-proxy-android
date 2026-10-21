@@ -151,7 +151,7 @@ fun ClientConfig.toCoreJson(
                     ?: ClientConfig.DEFAULT_STREAMS_PER_CRED,
                 manualCaptcha = manualCaptcha,
                 autoCaptcha = true,
-                advancedCaptcha = advancedCaptchaEnabled,
+                advancedCaptcha = advancedCaptchaEnabled && !manualCaptcha,
                 platform = CoreConfigJson.PLATFORM_MOBILE,
             ),
             obf = CoreConfigJson.Obf(
