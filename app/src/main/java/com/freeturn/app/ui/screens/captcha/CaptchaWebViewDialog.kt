@@ -10,6 +10,7 @@ import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.webkit.WebChromeClient
+import android.webkit.CookieManager
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.compose.foundation.layout.Box
@@ -128,9 +129,13 @@ object AutomaticCaptchaWebViewHostController {
             if (loadedChallengeId == challengeId) return@post
             destroyWebView()
             loadedChallengeId = challengeId
-            webView = createCaptchaWebView(context.applicationContext).also { view ->
-                view.onResume()
-                view.loadUrl(safeUrl)
+            clearCaptchaCookies {
+                if (loadedChallengeId == challengeId) {
+                    webView = createCaptchaWebView(context.applicationContext).also { view ->
+                        view.onResume()
+                        view.loadUrl(safeUrl)
+                    }
+                }
             }
         }
     }
@@ -139,6 +144,7 @@ object AutomaticCaptchaWebViewHostController {
         main.post {
             loadedChallengeId = Long.MIN_VALUE
             destroyWebView()
+            clearCaptchaCookies()
         }
     }
 
@@ -150,6 +156,15 @@ object AutomaticCaptchaWebViewHostController {
             destroy()
         }
         webView = null
+    }
+
+    private fun clearCaptchaCookies(onCleared: () -> Unit = {}) {
+        // The app has no other WebView-backed feature; its WebView cookie jar is used
+        // only by the local CAPTCHA proxy. Clear it after the challenge lifecycle ends.
+        CookieManager.getInstance().removeAllCookies {
+            CookieManager.getInstance().flush()
+            onCleared()
+        }
     }
 }
 
@@ -172,7 +187,11 @@ private fun CaptchaWebView(url: String) {
                     loadUrl(url)
                 }
             },
-            onRelease = { it.destroy() }
+            onRelease = {
+                it.stopLoading()
+                it.destroy()
+                CookieManager.getInstance().removeAllCookies { CookieManager.getInstance().flush() }
+            }
         )
         if (progress < 1f) {
             BusyProgressIndicator(
